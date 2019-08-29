@@ -1,50 +1,46 @@
 import React from 'react';
 import {render} from 'react-dom';
+import jsforce from 'jsforce';
 
 class App extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { input: 'hoge', tasks: [] }
+    this.state = { records: [] }
   }
 
-  onChange(e) {
-    this.setState({
-      input: e.target.value,
+  componentDidMount() {
+    jsforce.browser.init({
+      clientId: 'xxxx',
+      redirectUri: 'http://localhost:8081',
+    })
+    const app = this
+    jsforce.browser.on('connect', function(conn) {
+      // console.log(conn.accessToken)
+      conn.query('SELECT Id, Name FROM Account', function(err, res) {
+        if (err) { return console.error(err); }
+        app.setState({
+          records: res.records,
+        })
+      })
     })
   }
 
-  onSubmit(e) {
-    e.preventDefault();
-    const tasks = this.state.tasks;
-    tasks.push(this.state.input);
-    this.setState({
-      tasks: tasks,
-      input: '',
-    })
-  }
-
-  onClick(e) {
-    e.preventDefault();
-    this.setState({
-      tasks: [],
-      input: '',
-    })
+  login() {
+    jsforce.browser.login()
   }
 
   render () {
     return (
       <div>
-        <form onSubmit={this.onSubmit.bind(this)}>
-          <input type="text" onChange={this.onChange.bind(this)} value={this.state.input}/>
-          <p>{this.state.input}</p>
-          <input type="submit" value="Add" />
-          <input type="button" value="Clear" onClick={this.onClick.bind(this)}/>
-        </form>
-        <ul>
-          {this.state.tasks.map(task => {
-            return <li>{task}</li>
+        <input type="button" onClick={this.login.bind(this)} value="Login"/>
+        <table>
+          {this.state.records.map(record => {
+            return <tr>
+              <td>{record.Id}</td>
+              <td>{record.Name}</td>
+            </tr>
           })}
-        </ul>
+        </table>
       </div>
     )
   }
