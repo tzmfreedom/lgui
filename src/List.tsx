@@ -5,6 +5,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import Container from "@material-ui/core/Container";
 
 type Response = {
   records: any
@@ -22,41 +23,38 @@ const getQuery = (object: string) => {
 
 const List: React.FC<any> = (props: any) => {
   const conn = useSelector((state: any) => state.conn);
-  console.log(conn);
   const query = getQuery(props.object);
   const [records, setRecords] = useState([]);
   if (records.length === 0) {
-    if (conn === null) {
-      window.location.href = "/login";
-    } else {
-      conn.query(query, function(err: any, res: Response) {
-        if (err) { return console.error(err); }
-        setRecords(res.records);
-      });
-    }
+    conn.query(query, function(err: any, res: Response) {
+      if (err) { return console.error(err); }
+      setRecords(res.records);
+    });
   }
   return (
-    <React.Fragment>
-      <h2>Recent Orders</h2>
-      { records.length !== 0 && (
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Id</TableCell>
-            <TableCell>Name</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {records.map((record: any) => (
-            <TableRow key={record.Id}>
-              <TableCell>{record.Id}</TableCell>
-              <TableCell>{record.Name}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      )}
-    </React.Fragment>
+    <Container component="main" maxWidth="md">
+      <React.Fragment>
+        <h2>Recent Orders</h2>
+        { records.length !== 0 && (
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Id</TableCell>
+                <TableCell>Name</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {records.map((record: any) => (
+                <TableRow key={record.Id}>
+                  <TableCell>{record.Id}</TableCell>
+                  <TableCell>{record.Name}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </React.Fragment>
+    </Container>
   );
 }
 

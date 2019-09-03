@@ -1,6 +1,7 @@
 import React from 'react';
 import List from './List';
 import Form from './Form';
+import Auth from './Auth';
 import './App.scss';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -18,11 +19,6 @@ jsforce.browser.init({
 });
 
 const App: React.FC = () => {
-  // const path = window.location.pathname;
-  // const conn = useSelector((state: any) => state.conn);
-  // if (path !== "/login" && conn === null) {
-  //   window.location.href = "/login"
-  // }
   return (
     <Provider store={createFinalStore()}>
       <div className="App">
@@ -30,10 +26,14 @@ const App: React.FC = () => {
           <GlobalMenu objects={config.objects}/>
           <Switch>
             <Route exact path='/' component={Home} />
-            {config.objects.map((object: string) => {
-              return <Route key={object} exact path={'/' + object} render={() => <List object={object}/>} />
-            })}
-            <Route exact path='/Account/new' component={Form} />
+            <Auth>
+              <Switch>
+                {config.objects.map((object: string) => {
+                  return <Route key={object} exact path={'/' + object} render={() => <List object={object}/>} />
+                })}
+                <Route exact path='/Account/new' component={Form} />
+              </Switch>
+            </Auth>
             <Route exact path='/login' component={Login} />
           </Switch>
         </BrowserRouter>
@@ -43,7 +43,6 @@ const App: React.FC = () => {
 }
 
 const Home: React.FC = () => {
-  const dispatch = useDispatch();
   const messageChangeAction = (e: any) => {
     return {
       type: 'message-change',
@@ -52,12 +51,7 @@ const Home: React.FC = () => {
   };
   const message = useSelector((state: any) => state.message);
 
-  jsforce.browser.on('connect', function(conn: any) {
-    dispatch({
-      type: 'connection-created',
-      conn: conn,
-    })
-  });
+  const dispatch = useDispatch();
 
   return (
     <div>
