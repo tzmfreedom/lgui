@@ -10,7 +10,9 @@ const GlobalMenu: React.FC<any> = (props: any) => {
         {props.objects.map((object: any) => {
           return <li key={object}><Link to={'/' + object}>{object}</Link></li>
         })}
-        <li><Link to="/Account/new">Create</Link></li>
+        {props.objects.map((object: any) => {
+          return <li key={object}><Link to={`/${object}/new`}>{object} Create</Link></li>
+        })}
       </ul>
     </div>
   );

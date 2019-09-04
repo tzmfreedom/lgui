@@ -14,40 +14,50 @@ type Response = {
 const getQuery = (object: string) => {
   switch (object) {
     case 'Account':
-      return 'SELECT Id, Name FROM Account';
+      return 'SELECT Id, Name FROM Account ORDER BY CreatedDate DESC';
     case 'Contact':
-      return 'SELECT Id, Name FROM Contact';
+      return 'SELECT Id, Name FROM Contact ORDER BY CreatedDate DESC';
   }
-  return 'SELECT Id, Name FROM Account';
+  return 'SELECT Id, Name FROM Account ORDER BY CreatedDate DESC';
 }
 
 const List: React.FC<any> = (props: any) => {
-  const conn = useSelector((state: any) => state.conn);
-  const query = getQuery(props.object);
   const [records, setRecords] = useState([]);
+  const conn = useSelector((state: any) => state.conn);
   if (records.length === 0) {
+    const query = getQuery(props.object);
     conn.query(query, function(err: any, res: Response) {
       if (err) { return console.error(err); }
       setRecords(res.records);
     });
   }
+  const fields = [
+    'Id',
+    'Name',
+  ];
   return (
     <Container component="main" maxWidth="md">
       <React.Fragment>
-        <h2>Recent Orders</h2>
+        <h2>{props.object} List</h2>
         { records.length !== 0 && (
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Id</TableCell>
-                <TableCell>Name</TableCell>
+                <TableCell>Action</TableCell>
+                {fields.map((field: any) => {
+                  return <TableCell key={field}>{field}</TableCell>
+                })}
               </TableRow>
             </TableHead>
             <TableBody>
               {records.map((record: any) => (
                 <TableRow key={record.Id}>
-                  <TableCell>{record.Id}</TableCell>
-                  <TableCell>{record.Name}</TableCell>
+                  <TableCell key="action">
+                    <a href="#" onClick={() => { console.log('edit') }}>Edit</a> | <a href="#" onClick={() => { console.log('delete') }}>Delete</a>
+                  </TableCell>
+                  {fields.map((field: any) => {
+                    return <TableCell key={field}>{record[field]}</TableCell>
+                  })}
                 </TableRow>
               ))}
             </TableBody>

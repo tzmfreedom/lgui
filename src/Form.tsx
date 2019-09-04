@@ -8,6 +8,12 @@ import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import {useSelector} from "react-redux";
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+
+interface MyProps extends RouteComponentProps {
+  object: string
+}
 
 const useStyles = makeStyles(theme => ({
   '@global': {
@@ -34,7 +40,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const Form: React.FC = () => {
+const Form: React.FC<MyProps> = (props: MyProps) => {
   const classes = useStyles();
   const fields = [
     {
@@ -65,6 +71,15 @@ const Form: React.FC = () => {
         })
       })
     }
+  };
+  const conn = useSelector((state: any) => state.conn);
+  const createOrUpdate = (e: any) => {
+    e.preventDefault();
+    conn.sobject(props.object).create(form, (err: any, ret: any) => {
+      if (err) { console.error(err) }
+      console.log(ret.id);
+      props.history.push(`/${props.object}`);
+    });
   };
 
   return (
@@ -105,6 +120,7 @@ const Form: React.FC = () => {
             variant="contained"
             color="primary"
             className={classes.submit}
+            onClick={createOrUpdate}
           >
             Create
           </Button>
@@ -114,4 +130,4 @@ const Form: React.FC = () => {
   );
 }
 
-export default Form;
+export default withRouter(Form);

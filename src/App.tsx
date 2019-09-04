@@ -25,15 +25,13 @@ const App: React.FC = () => {
         <BrowserRouter>
           <GlobalMenu objects={config.objects}/>
           <Switch>
+            {config.objects.map((object: string) => {
+              return <Route key={object} exact path={'/' + object} render={(props: any) => <Auth><List object={object} {...props} /></Auth>} />
+            })}
+            {config.objects.map((object: string) => {
+              return <Route key={object + '_create'} exact path={'/' + object + '/new'} render={(props: any) => <Auth><Form object={object} {...props} /></Auth>} />
+            })}
             <Route exact path='/' component={Home} />
-            <Auth>
-              <Switch>
-                {config.objects.map((object: string) => {
-                  return <Route key={object} exact path={'/' + object} render={() => <List object={object}/>} />
-                })}
-                <Route exact path='/Account/new' component={Form} />
-              </Switch>
-            </Auth>
             <Route exact path='/login' component={Login} />
           </Switch>
         </BrowserRouter>
