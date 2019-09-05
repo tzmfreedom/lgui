@@ -31,6 +31,9 @@ const App: React.FC = () => {
             {config.objects.map((object: string) => {
               return <Route key={object + '_create'} exact path={'/' + object + '/new'} render={(props: any) => <Auth><Form object={object} {...props} /></Auth>} />
             })}
+            {config.objects.map((object: string) => {
+              return <Route key={object + '_update'} exact path={'/' + object + '/:id'} render={(props: any) => <Auth><Form object={object} id={props.match.params.id} {...props} /></Auth>} />
+            })}
             <Route exact path='/' component={Home} />
             <Route exact path='/login' component={Login} />
           </Switch>

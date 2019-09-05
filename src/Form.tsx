@@ -13,6 +13,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 interface MyProps extends RouteComponentProps {
   object: string
+  id: string | null
 }
 
 const useStyles = makeStyles(theme => ({
@@ -75,12 +76,23 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
   const conn = useSelector((state: any) => state.conn);
   const createOrUpdate = (e: any) => {
     e.preventDefault();
-    conn.sobject(props.object).create(form, (err: any, ret: any) => {
-      if (err) { console.error(err) }
-      console.log(ret.id);
-      props.history.push(`/${props.object}`);
-    });
+    if (props.id !== null) {
+      conn.sobject(props.object).update(Object.assign({}, form, {id: props.id}), (err: any, ret: any) => {
+        if (err) { console.error(err) }
+        props.history.push(`/${props.object}`);
+      });
+    } else {
+      conn.sobject(props.object).create(form, (err: any, ret: any) => {
+        if (err) { console.error(err) }
+        props.history.push(`/${props.object}`);
+      });
+    }
   };
+  if (props.id !== null) {
+    // conn.sobject(props.object).retrieve(props.id, (err: any, ret: any) => {
+    //   ret.LastName
+    // });
+  }
 
   return (
     <Container component="main" maxWidth="md">
