@@ -4,6 +4,7 @@ const INIT_STATE = {
     message: 'hoge',
     conn: null,
     flash: [],
+    overlay: false,
 };
 
 const rootReducer = (state: any = INIT_STATE, action: any) => {
@@ -23,6 +24,14 @@ const rootReducer = (state: any = INIT_STATE, action: any) => {
         case 'clear-flash-message':
             return Object.assign({}, state, {
                 flash: [],
+            });
+        case 'set-overlay':
+            return Object.assign({}, state, {
+                overlay: true,
+            });
+        case 'clear-overlay':
+            return Object.assign({}, state, {
+                overlay: false,
             });
     }
     return state;

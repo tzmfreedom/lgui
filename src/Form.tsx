@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
@@ -8,8 +8,10 @@ import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import {useSelector} from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { setOverlay, clearOverlay, addFlashMessage } from './actions';
+import { getAllUrlParams } from './util';
 
 interface MyProps extends RouteComponentProps {
   object: string
@@ -45,11 +47,11 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
   const classes = useStyles();
   const fields = [
     {
-      name: "firstname",
+      name: "FirstName",
       label: "First Name"
     },
     {
-      name: "lastname",
+      name: "LastName",
       label: "Last Name"
     },
     {
@@ -62,7 +64,7 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     },
   ];
 
-  const [form, setForm] = useState({});
+  const [form, setForm]: any = useState({});
   const onFormChange = (name: string) => {
     return (e: any) => {
       const value = e.target.value;
@@ -74,33 +76,46 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     }
   };
   const conn = useSelector((state: any) => state.conn);
+  const dispatch = useDispatch();
   const createOrUpdate = (e: any) => {
     e.preventDefault();
-    if (props.id !== null) {
+    dispatch(setOverlay());
+    if (props.id) {
       conn.sobject(props.object).update(Object.assign({}, form, {id: props.id}), (err: any, ret: any) => {
         if (err) { console.error(err) }
+        dispatch(clearOverlay());
+        dispatch(addFlashMessage(`${props.id} record is updated`));
         props.history.push(`/${props.object}`);
       });
     } else {
       conn.sobject(props.object).create(form, (err: any, ret: any) => {
         if (err) { console.error(err) }
+        dispatch(clearOverlay())
+        dispatch(addFlashMessage(`${ret.id} record is created`));
         props.history.push(`/${props.object}`);
       });
     }
   };
-  if (props.id !== null) {
-    // conn.sobject(props.object).retrieve(props.id, (err: any, ret: any) => {
-    //   ret.LastName
-    // });
-  }
+  useEffect(() => {
+    if (props.id !== null) {
+      conn.sobject(props.object).retrieve(props.id, (err: any, ret: any) => {
+        const init: any = {};
+        for (let key in ret) {
+          console.log(key)
+          if (key !== 'attributes' && key !== 'Id') {
+            init[key] = ret[key]
+          }
+        }
+
+        setForm((prev: any) => init)
+      });
+    }
+  }, []);
 
   return (
     <Container component="main" maxWidth="md">
       <CssBaseline />
       <div className={classes.paper}>
-        {/*<Avatar className={classes.avatar}>*/}
-        {/*  <LockOutlinedIcon />*/}
-        {/*</Avatar>*/}
         <Typography component="h1" variant="h5">Create Record</Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
@@ -115,7 +130,8 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
                     id={field.name}
                     label={field.label}
                     onChange={onFormChange(field.name)}
-                    autoFocus
+                    value={ form[field.name] ? form[field.name] + '' : ''}
+                    // autoFocus
                   />
                 </Grid>
               )

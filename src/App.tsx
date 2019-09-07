@@ -8,8 +8,8 @@ import { Provider } from 'react-redux';
 import GlobalMenu from "./GlobalMenu";
 import createFinalStore from './store';
 import yaml from 'js-yaml';
-import { useDispatch, useSelector } from "react-redux";
 import Login from './Login';
+import Overlay from './Overlay';
 const config = yaml.safeLoad("objects: [Account, Contact]");
 const jsforce = require('jsforce');
 
@@ -37,6 +37,7 @@ const App: React.FC = () => {
             <Route exact path='/' component={Home} />
             <Route exact path='/login' component={Login} />
           </Switch>
+          <Overlay/>
         </BrowserRouter>
       </div>
     </Provider>
@@ -44,21 +45,8 @@ const App: React.FC = () => {
 }
 
 const Home: React.FC = () => {
-  const messageChangeAction = (e: any) => {
-    return {
-      type: 'message-change',
-      value: e.target.value,
-    }
-  };
-  const message = useSelector((state: any) => state.message);
-
-  const dispatch = useDispatch();
-
   return (
-    <div>
-      <input type="text" value={message} onChange={(e) => dispatch(messageChangeAction(e))} />
-      <div>{message}</div>
-    </div>
+    <div></div>
   )
 }
 
