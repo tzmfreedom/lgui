@@ -10,12 +10,17 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { addFlashMessage, clearFlashMessage, setOverlay, clearOverlay } from './actions';
 import Button from "@material-ui/core/Button";
 import {withRouter} from "react-router";
+import {getAllUrlParams} from './util';
 
 type Response = {
   records: any
 }
 
 const getQuery = (object: string) => {
+  const params = getAllUrlParams(window.location.href);
+  if (params.query) {
+    return decodeURI(params.query);
+  }
   switch (object) {
     case 'Account':
       return 'SELECT Id, Name FROM Account ORDER BY CreatedDate DESC';

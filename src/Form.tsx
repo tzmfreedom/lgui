@@ -81,7 +81,7 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     e.preventDefault();
     dispatch(setOverlay());
     if (props.id) {
-      conn.sobject(props.object).update(Object.assign({}, form, {id: props.id}), (err: any, ret: any) => {
+      conn.sobject(props.object).update(Object.assign({}, form, {Id: props.id}), (err: any, ret: any) => {
         if (err) { console.error(err) }
         dispatch(clearOverlay());
         dispatch(addFlashMessage(`${props.id} record is updated`));
@@ -100,14 +100,15 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     if (props.id !== null) {
       conn.sobject(props.object).retrieve(props.id, (err: any, ret: any) => {
         const init: any = {};
+        const fieldNames = fields.map((field) => field.name);
         for (let key in ret) {
-          console.log(key)
-          if (key !== 'attributes' && key !== 'Id') {
+          if (fieldNames.includes(key)) {
             init[key] = ret[key]
           }
         }
 
-        setForm((prev: any) => init)
+        const params = getAllUrlParams(window.location.href);
+        setForm((prev: any) => Object.assign(init, params));
       });
     }
   }, []);
