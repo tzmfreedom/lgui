@@ -2,6 +2,7 @@ import React from 'react';
 import List from './List';
 import Form from './Form';
 import Auth from './Auth';
+import Setting from './Setting';
 import './App.scss';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -10,7 +11,8 @@ import createFinalStore from './store';
 import yaml from 'js-yaml';
 import Login from './Login';
 import Overlay from './Overlay';
-const config = yaml.safeLoad("objects: [Account, Contact]");
+import ConfigStore from './ConfigStore';
+const config: any = ConfigStore.getObject('lgui-settings');
 const jsforce = require('jsforce');
 
 jsforce.browser.init({
@@ -36,6 +38,7 @@ const App: React.FC = () => {
             })}
             <Route exact path='/' component={Home} />
             <Route exact path='/login' component={Login} />
+            <Route exact path='/setting' render={(props: any) => <Auth><Setting {...props}/></Auth>} />
           </Switch>
           <Overlay/>
         </BrowserRouter>

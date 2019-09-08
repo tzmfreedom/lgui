@@ -20,6 +20,7 @@ const GlobalMenu: React.FC<any> = (props: any) => {
           {props.objects.map((object: any) => {
             return <Tab key={object} label={object} value={`/${object}`} />
           })}
+          <Tab label="Setting" value="/setting" />
         </Tabs>
       </AppBar>
     </div>

@@ -11,9 +11,12 @@ class ConfigStore {
         localStorage.setItem(key, JSON.stringify(value));
     }
 
-    getObject(key: string) {
+    getObject(key: string, defaultValue: Object = []) {
         const value = localStorage.getItem(key);
-        if (value === null) return value;
+        if (value === null) {
+            this.setObject(key, defaultValue);
+            return defaultValue;
+        }
         return JSON.parse(value)
     }
 

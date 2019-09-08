@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -16,43 +16,33 @@ type Response = {
   records: any
 }
 
-const getQuery = (object: string) => {
-  const params = getAllUrlParams(window.location.href);
-  if (params.query) {
-    return decodeURI(params.query);
+const getFields = (params: any) => {
+  const defaultFields = [
+    'Id',
+    'Name',
+  ];
+  if (params.fields) {
+    return params.fields.split(',');
   }
-  switch (object) {
-    case 'Account':
-      return 'SELECT Id, Name FROM Account ORDER BY CreatedDate DESC';
-    case 'Contact':
-      return 'SELECT Id, Name FROM Contact ORDER BY CreatedDate DESC';
-  }
-  return 'SELECT Id, Name FROM Account ORDER BY CreatedDate DESC';
+  return defaultFields;
+}
+
+const getQuery = (object: string, fields: any, params: any) => {
+  return `SELECT ${fields.join(',')} FROM ${object} ORDER BY CreatedDate DESC`;
 }
 
 const List: React.FC<any> = (props: any) => {
   const [records, setRecords] = useState([]);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const conn = useSelector((state: any) => state.conn);
   const flash = useSelector((state: any) => state.flash);
-  if (records.length === 0) {
-    dispatch(setOverlay())
-    const query = getQuery(props.object);
-    conn.query(query, function(err: any, res: Response) {
-      if (err) { return console.error(err); }
-      setRecords(res.records);
-      dispatch(clearOverlay())
-    });
-  }
-  const fields = [
-    'Id',
-    'Name',
-  ];
+  const params = getAllUrlParams(window.location.href);
+  const fields = getFields(params);
   const deleteRequest = (id: string) => {
-    dispatch(setOverlay())
+    dispatch(setOverlay());
     conn.sobject(props.object).destroy(id, (err: any, ret: any) => {
       if (err || !ret.success) { console.error(err, ret) }
-      const query = getQuery(props.object);
+      const query = getQuery(props.object, fields, params);
       conn.query(query, function(err: any, res: Response) {
         if (err) { return console.error(err); }
         setRecords(res.records);
@@ -65,6 +55,15 @@ const List: React.FC<any> = (props: any) => {
   const handleClose = () => {
     dispatch(clearFlashMessage())
   }
+  useEffect(() => {
+    dispatch(setOverlay())
+    const query = getQuery(props.object, fields, params);
+    conn.query(query, function(err: any, res: Response) {
+      if (err) { return console.error(err); }
+      setRecords(res.records);
+      dispatch(clearOverlay())
+    });
+  }, []);
 
   return (
     <Container component="main" maxWidth="md">
