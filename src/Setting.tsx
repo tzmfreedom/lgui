@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { ConfigStore, Settings } from './ConfigStore';
 import { Button } from '@material-ui/core';
@@ -13,14 +13,14 @@ const Setting: React.FC<any> = (props: any) => {
   const [object, setObject] = useState({} as any);
   const [objects, setObjects] = useState([] as Array<any>);
   const conn = useSelector((state: any) => state.conn);
-  const selectObject = (e: any) => {
+  const selectObject = useCallback((e: any) => {
     setObject(e);
-  };
-  const addObject = () => {
+  }, []);
+  const addObject = useCallback(() => {
     settings.objects.push(object.value);
     ConfigStore.setObject(Settings.Key, settings);
     setSelectObjects(settings.objects);
-  };
+  }, [object.value]);
 
   const deleteObject = (object: string) => {
     return () => {
@@ -31,9 +31,11 @@ const Setting: React.FC<any> = (props: any) => {
     }
   };
 
-  const options = objects.map((object: string) => {
-    return { label: object, value: object };
-  }) as OptionsType<any>;
+  const options = useMemo(() => {
+    return objects.map((object: string) => {
+      return { label: object, value: object };
+    });
+  }, [objects]);
 
   useEffect(() => {
     dispatch(setOverlay())

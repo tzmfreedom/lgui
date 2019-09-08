@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
@@ -65,6 +65,8 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
   ];
 
   const [form, setForm]: any = useState({});
+  const conn = useSelector((state: any) => state.conn);
+  const dispatch = useDispatch();
   const onFormChange = (name: string) => {
     return (e: any) => {
       const value = e.target.value;
@@ -75,9 +77,7 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
       })
     }
   };
-  const conn = useSelector((state: any) => state.conn);
-  const dispatch = useDispatch();
-  const createOrUpdate = (e: any) => {
+  const createOrUpdate = useCallback((e: any) => {
     e.preventDefault();
     dispatch(setOverlay());
     if (props.id) {
@@ -101,7 +101,7 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
         props.history.push(`/${props.object}`);
       });
     }
-  };
+  }, [props.id, props.object]);
   useEffect(() => {
     if (props.id !== null) {
       conn.sobject(props.object).retrieve(props.id, (err: any, ret: any) => {

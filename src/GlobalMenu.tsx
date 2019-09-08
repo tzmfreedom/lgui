@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { withRouter } from 'react-router';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
@@ -8,10 +8,10 @@ const GlobalMenu: React.FC<any> = (props: any) => {
   const m = window.location.pathname.match(/^(\/[a-zA-Z\d_]+)\/[a-zA-Z\d]+/);
   const path: string = m ? m[1] : window.location.pathname;
   const [tabValue, setTabValue] = useState(path);
-  const handleChange = (event: any, value: string) => {
+  const handleChange = useCallback((event: any, value: string) => {
     setTabValue(value)
     props.history.push(value)
-  }
+  }, []);
   return (
     <div>
       <AppBar position="static">

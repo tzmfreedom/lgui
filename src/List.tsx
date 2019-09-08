@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -41,7 +41,8 @@ const List: React.FC<any> = (props: any) => {
   const flash = useSelector((state: any) => state.flash);
   const params = getAllUrlParams(window.location.href);
   const [fields, setFields] = useState(getFields(params));
-  const deleteRequest = (id: string) => {
+
+  const deleteRequest = useCallback((id: string) => {
     dispatch(setOverlay());
     conn.sobject(props.object).destroy(id, (err: any, ret: any) => {
       if (err || !ret.success) {
@@ -61,18 +62,19 @@ const List: React.FC<any> = (props: any) => {
         dispatch(clearOverlay())
       });
     });
-  }
+  }, [props.object, fields, params])
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     dispatch(clearFlashMessage())
-  }
+  }, [])
 
-  const selectField = (value: any) => {
+  const selectField = useCallback((value: any) => {
     setListableField(value);
-  }
+  }, [])
 
-  const addField = () => {
+  const addField = useCallback(() => {
     fields.push(listableField.value)
+    console.log(listableField)
     setFields(fields);
     const query = getQuery(props.object, fields, params);
     conn.query(query, (err: any, res: Response) => {
@@ -84,9 +86,9 @@ const List: React.FC<any> = (props: any) => {
       setRecords(res.records);
       dispatch(clearOverlay())
     });
-  }
+  }, [fields, listableField, props.object, params])
 
-  const saveView = () => {
+  const saveView = useCallback(() => {
     const settings = ConfigStore.getObject(Settings.Key, Settings.Default);
     const views = settings.views[props.object];
     const view = {
@@ -99,7 +101,7 @@ const List: React.FC<any> = (props: any) => {
     }
     ConfigStore.setObject(Settings.Key, settings);
     dispatch(addFlashMessage('view is created'))
-  }
+  }, [props.object])
 
   useEffect(() => {
     dispatch(setOverlay())
