@@ -1,38 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import ConfigStore from './ConfigStore';
-import { Button, InputLabel, FormControl, MenuItem } from '@material-ui/core';
+import { useSelector, useDispatch } from 'react-redux';
+import { ConfigStore, Settings } from './ConfigStore';
+import { Button } from '@material-ui/core';
 import Select from 'react-select';
 import {OptionsType} from "react-select/src/types";
-
-const LGUI_SETTINGS = 'lgui-settings';
+import {addFlashMessage, setOverlay, clearOverlay} from "./actions";
 
 const Setting: React.FC<any> = (props: any) => {
-  const settings = ConfigStore.getObject(LGUI_SETTINGS, {
-    objects: [
-      'Account',
-      'Contact',
-    ]
-  });
+  const dispatch = useDispatch();
+  const settings = ConfigStore.getObject(Settings.Key, Settings.Default);
   const [selectObjects, setSelectObjects] = useState(settings.objects);
   const [object, setObject] = useState({} as any);
-  const [objects, setObjects] = useState([]);
+  const [objects, setObjects] = useState([] as Array<any>);
   const conn = useSelector((state: any) => state.conn);
   const selectObject = (e: any) => {
     setObject(e);
   };
   const addObject = () => {
     settings.objects.push(object.value);
-    ConfigStore.setObject(LGUI_SETTINGS, settings);
+    ConfigStore.setObject(Settings.Key, settings);
     setSelectObjects(settings.objects);
   };
 
   const deleteObject = (object: string) => {
     return () => {
       const index = settings.objects.findIndex((v: any) => v === object);
-      console.log(index)
       settings.objects.splice(index, 1);
-      ConfigStore.setObject(LGUI_SETTINGS, settings);
+      ConfigStore.setObject(Settings.Key, settings);
       setSelectObjects(settings.objects);
     }
   };
@@ -42,17 +36,27 @@ const Setting: React.FC<any> = (props: any) => {
   }) as OptionsType<any>;
 
   useEffect(() => {
+    dispatch(setOverlay())
     conn.describeGlobal((err: any, res: any) => {
       if (err) {
-        return console.error(err);
+        addFlashMessage(err);
+        dispatch(clearOverlay());
+        return;
       }
-      const objects = res.sobjects.map((sobject: any) => sobject.name);
-      setObjects(objects);
-      const name = objects[0];
+      const sobjects = res.sobjects
+        .filter((sobject: any) => {
+          return sobject.queryable &&
+            (sobject.custom || Settings.AllowedStandardObjects.includes(sobject.name)) &&
+            !selectObjects.includes(sobject.name)
+        })
+        .map((sobject: any) => sobject.name);
+      setObjects(sobjects);
+      const name = sobjects[0];
       setObject({
         label: name,
         value: name,
       });
+      dispatch(clearOverlay());
     });
   }, []);
 

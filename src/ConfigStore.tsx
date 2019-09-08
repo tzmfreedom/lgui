@@ -1,4 +1,4 @@
-class ConfigStore {
+class ConfigStore_ {
     get(key: string) {
         return localStorage.getItem(key);
     }
@@ -24,6 +24,21 @@ class ConfigStore {
         localStorage.removeItem(key);
     }
 }
-
-export default new ConfigStore();
+const allowedStandardObjects = [
+    'Account',
+    'Contact',
+    'User',
+    'Lead',
+    'Opportunity',
+    'Case',
+];
+export const ConfigStore = new ConfigStore_();
+export const Settings = {
+    Key: 'lgui-settings',
+    AllowedStandardObjects: allowedStandardObjects,
+    Default: {
+        objects: allowedStandardObjects,
+        views: {},
+    },
+};
 

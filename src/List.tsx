@@ -11,6 +11,8 @@ import { addFlashMessage, clearFlashMessage, setOverlay, clearOverlay } from './
 import Button from "@material-ui/core/Button";
 import {withRouter} from "react-router";
 import {getAllUrlParams} from './util';
+import Select from "react-select";
+import { ConfigStore, Settings } from "./ConfigStore";
 
 type Response = {
   records: any
@@ -19,7 +21,6 @@ type Response = {
 const getFields = (params: any) => {
   const defaultFields = [
     'Id',
-    'Name',
   ];
   if (params.fields) {
     return params.fields.split(',');
@@ -27,24 +28,34 @@ const getFields = (params: any) => {
   return defaultFields;
 }
 
-const getQuery = (object: string, fields: any, params: any) => {
-  return `SELECT ${fields.join(',')} FROM ${object} ORDER BY CreatedDate DESC`;
+const getQuery = (object: string, fields: Array<string>, params: any) => {
+  return `SELECT ${fields.join(',')} FROM ${object}`;
 }
 
 const List: React.FC<any> = (props: any) => {
   const [records, setRecords] = useState([]);
+  const [listableField, setListableField] = useState({} as any);
+  const [listableFieldOptions, setListableFieldOptions] = useState([]);
   const dispatch = useDispatch();
   const conn = useSelector((state: any) => state.conn);
   const flash = useSelector((state: any) => state.flash);
   const params = getAllUrlParams(window.location.href);
-  const fields = getFields(params);
+  const [fields, setFields] = useState(getFields(params));
   const deleteRequest = (id: string) => {
     dispatch(setOverlay());
     conn.sobject(props.object).destroy(id, (err: any, ret: any) => {
-      if (err || !ret.success) { console.error(err, ret) }
+      if (err || !ret.success) {
+        dispatch(clearOverlay());
+        addFlashMessage(err);
+        return;
+      }
       const query = getQuery(props.object, fields, params);
       conn.query(query, function(err: any, res: Response) {
-        if (err) { return console.error(err); }
+        if (err) {
+          addFlashMessage(err);
+          dispatch(clearOverlay())
+          return;
+        }
         setRecords(res.records);
         dispatch(addFlashMessage(`${id} record is deleted`));
         dispatch(clearOverlay())
@@ -55,14 +66,68 @@ const List: React.FC<any> = (props: any) => {
   const handleClose = () => {
     dispatch(clearFlashMessage())
   }
-  useEffect(() => {
-    dispatch(setOverlay())
+
+  const selectField = (value: any) => {
+    setListableField(value);
+  }
+
+  const addField = () => {
+    fields.push(listableField.value)
+    setFields(fields);
     const query = getQuery(props.object, fields, params);
-    conn.query(query, function(err: any, res: Response) {
-      if (err) { return console.error(err); }
+    conn.query(query, (err: any, res: Response) => {
+      if (err) {
+        addFlashMessage(err);
+        dispatch(clearOverlay())
+        return;
+      }
       setRecords(res.records);
       dispatch(clearOverlay())
     });
+  }
+
+  const saveView = () => {
+    const settings = ConfigStore.getObject(Settings.Key, Settings.Default);
+    const views = settings.views[props.object];
+    const view = {
+      fields,
+    }
+    if (views) {
+      views.push(view);
+    } else {
+      settings.views[props.object] = [view];
+    }
+    ConfigStore.setObject(Settings.Key, settings);
+    dispatch(addFlashMessage('view is created'))
+  }
+
+  useEffect(() => {
+    dispatch(setOverlay())
+    const query = getQuery(props.object, fields, params);
+    conn.query(query, (err: any, res: Response) => {
+      if (err) {
+        addFlashMessage(err);
+        dispatch(clearOverlay())
+        return;
+      }
+      setRecords(res.records);
+      dispatch(clearOverlay())
+    });
+
+    conn.sobject(props.object).describe((err: any, res: any) => {
+      if (err) {
+        addFlashMessage(err);
+        return;
+      }
+      const fields = res.fields.map((field: any) => {
+        return {
+          label: field.name,
+          value: field.name,
+        }
+      });
+      setListableFieldOptions(fields);
+      setListableField(fields[0])
+    })
   }, []);
 
   return (
@@ -81,6 +146,14 @@ const List: React.FC<any> = (props: any) => {
           />
         ) }
         <Button variant="contained" color="primary" onClick={() => { props.history.push(`/${props.object}/new/`) }}>Create</Button>
+        <Select
+          className='fields'
+          value={listableField}
+          onChange={selectField}
+          options={listableFieldOptions}
+        />
+        <Button variant="contained" color="primary" onClick={addField}>Add Field</Button>
+        <Button variant="contained" color="primary" onClick={saveView}>Save View</Button>
         <h2>{props.object} List</h2>
         { records.length !== 0 && (
           <Table size="small">

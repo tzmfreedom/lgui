@@ -82,15 +82,21 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     dispatch(setOverlay());
     if (props.id) {
       conn.sobject(props.object).update(Object.assign({}, form, {Id: props.id}), (err: any, ret: any) => {
-        if (err) { console.error(err) }
         dispatch(clearOverlay());
+        if (err) {
+          addFlashMessage(err);
+          return;
+        }
         dispatch(addFlashMessage(`${props.id} record is updated`));
         props.history.push(`/${props.object}`);
       });
     } else {
       conn.sobject(props.object).create(form, (err: any, ret: any) => {
-        if (err) { console.error(err) }
-        dispatch(clearOverlay())
+        dispatch(clearOverlay());
+        if (err) {
+          addFlashMessage(err);
+          return;
+        }
         dispatch(addFlashMessage(`${ret.id} record is created`));
         props.history.push(`/${props.object}`);
       });
@@ -111,7 +117,7 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
         setForm((prev: any) => Object.assign(init, params));
       });
     }
-  }, []);
+  }, [props.object, props.id]);
 
   return (
     <Container component="main" maxWidth="md">

@@ -8,11 +8,10 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import GlobalMenu from "./GlobalMenu";
 import createFinalStore from './store';
-import yaml from 'js-yaml';
 import Login from './Login';
 import Overlay from './Overlay';
-import ConfigStore from './ConfigStore';
-const config: any = ConfigStore.getObject('lgui-settings');
+import { ConfigStore, Settings } from './ConfigStore';
+const config: any = ConfigStore.getObject(Settings.Key, Settings.Default);
 const jsforce = require('jsforce');
 
 jsforce.browser.init({
