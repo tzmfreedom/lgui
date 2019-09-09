@@ -2,6 +2,7 @@
   "name": "lgui",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://tzmfreedom.github.io/lgui",
   "dependencies": {
     "@material-ui/core": "^4.4.0",
     "@material-ui/icons": "^4.2.1",
@@ -9,6 +10,7 @@
     "@types/js-yaml": "^3.12.1",
     "@types/node": "12.7.3",
     "@types/react": "16.9.2",
+    "@types/react-csv": "^1.1.1",
     "@types/react-dom": "16.9.0",
     "@types/react-redux": "^7.1.2",
     "@types/react-router-dom": "^4.3.5",
@@ -17,6 +19,7 @@
     "jsforce": "^1.9.2",
     "node-sass": "^4.12.0",
     "react": "^16.9.0",
+    "react-csv": "^1.1.1",
     "react-dom": "^16.9.0",
     "react-redux": "^7.1.1",
     "react-router-dom": "^5.0.1",
@@ -28,7 +31,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -44,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^2.1.1"
   }
 }

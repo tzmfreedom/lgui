@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, {useEffect, useState, useCallback, useMemo} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -13,7 +13,8 @@ import {withRouter} from "react-router";
 import {getAllUrlParams} from './util';
 import Select from "react-select";
 import { ConfigStore, Settings } from "./ConfigStore";
-
+import { CSVLink, CSVDownload } from "react-csv";
+ 
 type Response = {
   records: any
 }
@@ -132,6 +133,19 @@ const List: React.FC<any> = (props: any) => {
     })
   }, []);
 
+  const csvData = useMemo(() => {
+    const csvData = [];
+    csvData.push(fields);
+    records.forEach((record) => {
+      const csvRow = fields.reduce((arr: Array<any>, field: string) => {
+        arr.push(record[field]);
+        return arr;
+      }, []);
+      csvData.push(csvRow);
+    });
+    return csvData;
+  }, [records, fields])
+
   return (
     <Container component="main" maxWidth="md">
       <React.Fragment>
@@ -156,6 +170,7 @@ const List: React.FC<any> = (props: any) => {
         />
         <Button variant="contained" color="primary" onClick={addField}>Add Field</Button>
         <Button variant="contained" color="primary" onClick={saveView}>Save View</Button>
+        <CSVLink data={csvData}>Download me</CSVLink>
         <h2>{props.object} List</h2>
         { records.length !== 0 && (
           <Table size="small">

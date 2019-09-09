@@ -4,7 +4,7 @@ const jsforce = require('jsforce');
 
 const Login: React.FC = () => {
   return (
-    <Button variant="contained" color="primary" onClick={() => { jsforce.browser.login() }}>Login with Salesforce</Button>
+    <Button variant="contained" color="primary" onClick={() => { }}>Login with Salesforce</Button>
   );
 }
 
