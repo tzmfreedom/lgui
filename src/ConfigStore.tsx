@@ -11,7 +11,7 @@ export interface LayoutStore {
 
 export interface Layout {
     definitions: Array<LayoutDefinition>
-    defaultSize: number
+    defaultSize: any
 }
 
 export type LayoutDefinition = LayoutDefinitionField | LayoutDefinitionButton | LayoutDefinitionSection | LayoutDefinitionBlank;

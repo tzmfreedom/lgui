@@ -15,15 +15,15 @@ const config: any = ConfigStore.getObject(Settings.Key, Settings.Default);
 const jsforce = require('jsforce');
 
 jsforce.browser.init({
-  clientId: '3MVG9yZ.WNe6byQBYCaGTfGZBIwoVDFt8TFZTdt3Umcg0WEU4hFD7a0AdXKrGMxTyREzOyqKMXlVpYKyJeJk7',
-  redirectUri: 'https://tzmfreedom.github.io/lgui'
+  clientId: process.env.REACT_APP_SALESFORCE_CLIENT_ID,
+  redirectUri: process.env.REACT_APP_SALESFORCE_REDIRECT_URI,
 });
 
 const App: React.FC = () => {
   return (
     <Provider store={createFinalStore()}>
       <div className="App">
-        <BrowserRouter>
+        <BrowserRouter basename={process.env.REACT_APP_BASE_PATH}>
           <GlobalMenu objects={config.objects}/>
           <Switch>
             {config.objects.map((object: string) => {
