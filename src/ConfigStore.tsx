@@ -1,3 +1,40 @@
+export interface Config {
+    objects: Array<string>
+    views: any
+    layouts: { [key: string]: LayoutStore }
+}
+
+export interface LayoutStore {
+    default: Layout
+    [key:string] : Layout
+}
+
+export interface Layout {
+    definitions: Array<LayoutDefinition>
+    defaultSize: number
+}
+
+export type LayoutDefinition = LayoutDefinitionField | LayoutDefinitionButton | LayoutDefinitionSection | LayoutDefinitionBlank;
+
+export interface LayoutDefinitionField {
+    type: 'field'
+    name: string
+    required?: boolean
+    label?: string
+}
+
+export interface LayoutDefinitionButton {
+    type: 'button'
+    label?: string
+}
+export interface LayoutDefinitionSection {
+    type: 'section'
+    label?: string
+}
+export interface LayoutDefinitionBlank {
+    type: 'blank'
+}
+
 class ConfigStore_ {
     get(key: string) {
         return localStorage.getItem(key);
@@ -11,7 +48,7 @@ class ConfigStore_ {
         localStorage.setItem(key, JSON.stringify(value));
     }
 
-    getObject(key: string, defaultValue: Object = []) {
+    getObject(key: string, defaultValue: Object): Object {
         const value = localStorage.getItem(key);
         if (value === null) {
             this.setObject(key, defaultValue);
@@ -39,6 +76,7 @@ export const Settings = {
     Default: {
         objects: allowedStandardObjects,
         views: {},
+        layouts: {},
     },
 };
 

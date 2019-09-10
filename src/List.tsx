@@ -7,13 +7,13 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Container from "@material-ui/core/Container";
 import Snackbar from '@material-ui/core/Snackbar';
-import { addFlashMessage, clearFlashMessage, setOverlay, clearOverlay } from './actions';
+import { addFlashMessage, clearFlashMessage, setOverlay, clearOverlay, cacheRecords, cacheDescribe } from './actions';
 import Button from "@material-ui/core/Button";
 import {withRouter} from "react-router";
 import {getAllUrlParams} from './util';
 import Select from "react-select";
-import { ConfigStore, Settings } from "./ConfigStore";
-import { CSVLink, CSVDownload } from "react-csv";
+import { ConfigStore, Settings, Config } from "./ConfigStore";
+import { CSVLink } from "react-csv";
  
 type Response = {
   records: any
@@ -40,6 +40,7 @@ const List: React.FC<any> = (props: any) => {
   const dispatch = useDispatch();
   const conn = useSelector((state: any) => state.conn);
   const flash = useSelector((state: any) => state.flash);
+  const cache = useSelector((state: any) => state.cache[props.object]);
   const params = getAllUrlParams(window.location.href);
   const [fields, setFields] = useState(getFields(params));
 
@@ -60,7 +61,8 @@ const List: React.FC<any> = (props: any) => {
         }
         setRecords(res.records);
         dispatch(addFlashMessage(`${id} record is deleted`));
-        dispatch(clearOverlay())
+        dispatch(clearOverlay());
+        dispatch(cacheRecords(props.object, res.records));
       });
     });
   }, [props.object, fields, params])
@@ -75,7 +77,6 @@ const List: React.FC<any> = (props: any) => {
 
   const addField = useCallback(() => {
     fields.push(listableField.value)
-    console.log(listableField)
     setFields(fields);
     const query = getQuery(props.object, fields, params);
     conn.query(query, (err: any, res: Response) => {
@@ -85,12 +86,13 @@ const List: React.FC<any> = (props: any) => {
         return;
       }
       setRecords(res.records);
-      dispatch(clearOverlay())
+      dispatch(clearOverlay());
+      dispatch(cacheRecords(props.object, res.records));
     });
   }, [fields, listableField, props.object, params])
 
   const saveView = useCallback(() => {
-    const settings = ConfigStore.getObject(Settings.Key, Settings.Default);
+    const settings = ConfigStore.getObject(Settings.Key, Settings.Default) as Config;
     const views = settings.views[props.object];
     const view = {
       fields,
@@ -105,32 +107,42 @@ const List: React.FC<any> = (props: any) => {
   }, [props.object])
 
   useEffect(() => {
-    dispatch(setOverlay())
-    const query = getQuery(props.object, fields, params);
-    conn.query(query, (err: any, res: Response) => {
-      if (err) {
-        addFlashMessage(err);
-        dispatch(clearOverlay())
-        return;
-      }
-      setRecords(res.records);
-      dispatch(clearOverlay())
-    });
-
-    conn.sobject(props.object).describe((err: any, res: any) => {
-      if (err) {
-        addFlashMessage(err);
-        return;
-      }
-      const fields = res.fields.map((field: any) => {
-        return {
-          label: field.name,
-          value: field.name,
+    if (cache && cache.records) {
+      setRecords(cache.records);
+    } else {
+      dispatch(setOverlay())
+      const query = getQuery(props.object, fields, params);
+      conn.query(query, (err: any, res: Response) => {
+        if (err) {
+          addFlashMessage(err);
+          dispatch(clearOverlay())
+          return;
         }
+        setRecords(res.records);
+        dispatch(clearOverlay())
+        dispatch(cacheRecords(props.object, res.records));
       });
-      setListableFieldOptions(fields);
-      setListableField(fields[0])
-    })
+    }
+    if (cache && cache.describe) {
+      setListableFieldOptions(cache.describe);
+      setListableField(cache.describe[0]);
+    } else {
+      conn.sobject(props.object).describe((err: any, res: any) => {
+        if (err) {
+          addFlashMessage(err);
+          return;
+        }
+        const fields = res.fields.map((field: any) => {
+          return {
+            label: field.label,
+            value: field.name,
+          }
+        });
+        setListableFieldOptions(fields);
+        setListableField(fields[0])
+        dispatch(cacheDescribe(props.object, fields))
+      })
+    }
   }, []);
 
   const csvData = useMemo(() => {

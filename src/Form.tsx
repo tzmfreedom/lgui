@@ -12,6 +12,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { setOverlay, clearOverlay, addFlashMessage } from './actions';
 import { getAllUrlParams } from './util';
+import { ConfigStore, Settings, Config, LayoutDefinition, LayoutDefinitionField, LayoutStore } from './ConfigStore';
+
+const config = ConfigStore.getObject(Settings.Key, Settings.Default) as Config;
 
 interface MyProps extends RouteComponentProps {
   object: string
@@ -45,28 +48,22 @@ const useStyles = makeStyles(theme => ({
 
 const Form: React.FC<MyProps> = (props: MyProps) => {
   const classes = useStyles();
-  const fields = [
-    {
-      name: "FirstName",
-      label: "First Name"
-    },
-    {
-      name: "LastName",
-      label: "Last Name"
-    },
-    {
-      name: "email",
-      label: "Email"
-    },
-    {
-      name: "address",
-      label: "Address"
-    },
-  ];
-
   const [form, setForm]: any = useState({});
   const conn = useSelector((state: any) => state.conn);
   const dispatch = useDispatch();
+  const layout = config.layouts[props.object] ? config.layouts[props.object] : {
+    default: {
+      definitions: [
+        {
+          name: 'Name',
+          required: true,
+        }
+      ],
+      defaultSize: 4,
+    }
+  } as LayoutStore;
+  const defaultSize = layout.default.defaultSize;
+  const definitions = layout.default.definitions;
   const onFormChange = (name: string) => {
     return (e: any) => {
       const value = e.target.value;
@@ -106,7 +103,8 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     if (props.id !== null) {
       conn.sobject(props.object).retrieve(props.id, (err: any, ret: any) => {
         const init: any = {};
-        const fieldNames = fields.map((field) => field.name);
+        const fieldNames = definitions.filter((def: LayoutDefinition) => def.type === 'field')
+          .map((field: LayoutDefinitionField): field is LayoutDefinitionField => field.name);
         for (let key in ret) {
           if (fieldNames.includes(key)) {
             init[key] = ret[key]
@@ -126,29 +124,32 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
         <Typography component="h1" variant="h5">Create Record</Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
-            {fields.map((field: any) => {
-              return (
-                <Grid item xs={12} sm={6} key={field.name}>
-                  <TextField
-                    autoComplete="fname"
-                    name={field.name}
-                    variant="outlined"
-                    fullWidth
-                    id={field.name}
-                    label={field.label}
-                    onChange={onFormChange(field.name)}
-                    value={ form[field.name] ? form[field.name] + '' : ''}
-                    // autoFocus
-                  />
-                </Grid>
-              )
+            {definitions.map((def: LayoutDefinition) => {
+              switch (def.type) {
+                case 'field':
+                  return (
+                    <Grid item xs={12} sm={defaultSize} key={def.name}>
+                      <TextField
+                        autoComplete="fname"
+                        name={def.name}
+                        variant="outlined"
+                        fullWidth
+                        id={def.name}
+                        label={def.label}
+                        onChange={onFormChange(def.name)}
+                        value={form[def.name] ? form[def.name] + '' : ''}
+                      // autoFocus
+                      />
+                    </Grid>
+                  );
+                case 'blank':
+                    return <Grid item xs={12} sm={defaultSize} key={'blank'}></Grid>
+                case 'section':
+                    return <Grid item xs={12} sm={defaultSize} key={'section'}></Grid>
+                case 'button':
+                    return <Grid item xs={12} sm={defaultSize} key={'button'}></Grid>
+              }
             })}
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
-              />
-            </Grid>
           </Grid>
           <Button
             type="submit"
@@ -157,7 +158,7 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
             className={classes.submit}
             onClick={createOrUpdate}
           >
-            Create
+            {props.id ? 'Update' : 'Create'}
           </Button>
         </form>
       </div>

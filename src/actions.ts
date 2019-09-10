@@ -27,10 +27,25 @@ const clearFlashMessage = () => {
 const connectionCreated = (conn: any) => {
   return {
     type: 'connection-created',
-    conn: conn,
+    conn,
   }
 }
 
+const cacheRecords = (object: string, records: Array<any>) => {
+  return {
+    type: 'cache-records',
+    object,
+    records,
+  }
+}
+
+const cacheDescribe = (object: string, fields: Array<any>) => {
+  return {
+    type: 'cache-describe',
+    object,
+    fields,
+  }
+}
 
 export {
   setOverlay,
@@ -38,4 +53,6 @@ export {
   addFlashMessage,
   clearFlashMessage,
   connectionCreated,
+  cacheRecords,
+  cacheDescribe,
 }

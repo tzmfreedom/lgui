@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { ConfigStore, Settings } from './ConfigStore';
-import { Button } from '@material-ui/core';
+import { ConfigStore, Settings, Config } from './ConfigStore';
+import { Button, TextField } from '@material-ui/core';
 import Select from 'react-select';
-import {OptionsType} from "react-select/src/types";
 import {addFlashMessage, setOverlay, clearOverlay} from "./actions";
 
 const Setting: React.FC<any> = (props: any) => {
   const dispatch = useDispatch();
-  const settings = ConfigStore.getObject(Settings.Key, Settings.Default);
+  const settings = ConfigStore.getObject(Settings.Key, Settings.Default) as Config;
   const [selectObjects, setSelectObjects] = useState(settings.objects);
   const [object, setObject] = useState({} as any);
   const [objects, setObjects] = useState([] as Array<any>);
@@ -91,6 +90,10 @@ const Setting: React.FC<any> = (props: any) => {
           options={options}
         />
         <Button onClick={addObject}>Add</Button>
+      </form>
+      <form>
+        <TextField multiline={true} />
+        <Button onClick={addObject}>設定を読み込む</Button>
       </form>
     </div>
   );

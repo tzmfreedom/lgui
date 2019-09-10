@@ -5,6 +5,7 @@ const INIT_STATE = {
     conn: null,
     flash: [],
     overlay: false,
+    cache: {},
 };
 
 const rootReducer = (state: any = INIT_STATE, action: any) => {
@@ -33,6 +34,24 @@ const rootReducer = (state: any = INIT_STATE, action: any) => {
             return Object.assign({}, state, {
                 overlay: false,
             });
+        case 'cache-records':
+            return (() => {
+                const ret = Object.assign({}, state);
+                if (!ret.cache[action.object]) {
+                    ret.cache[action.object] = {}
+                }
+                ret.cache[action.object].records = action.records;
+                return ret;
+            })()
+        case 'cache-describe':
+            return (() => {
+                const ret = Object.assign({}, state);
+                if (!ret.cache[action.object]) {
+                    ret.cache[action.object] = {}
+                }
+                ret.cache[action.object].describe = action.fields;
+                return ret;
+            })()
     }
     return state;
 }
