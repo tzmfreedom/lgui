@@ -103,8 +103,8 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     if (props.id !== null) {
       conn.sobject(props.object).retrieve(props.id, (err: any, ret: any) => {
         const init: any = {};
-        const fieldNames = definitions.filter((def: LayoutDefinition) => def.type === 'field')
-          .map((field: LayoutDefinitionField): field is LayoutDefinitionField => field.name);
+        const fieldNames = definitions.filter((def: LayoutDefinition): def is LayoutDefinitionField => def.type === 'field')
+          .map((field: LayoutDefinitionField) => field.name);
         for (let key in ret) {
           if (fieldNames.includes(key)) {
             init[key] = ret[key]
