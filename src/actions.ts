@@ -47,6 +47,13 @@ const cacheDescribe = (object: string, fields: Array<any>) => {
   }
 }
 
+const setDescribeGlobal = (describeGlobalResult: Array<any>) => {
+  return {
+    type: 'set-describe-global',
+    describeGlobalResult,
+  }
+}
+
 export {
   setOverlay,
   clearOverlay,
@@ -55,4 +62,5 @@ export {
   connectionCreated,
   cacheRecords,
   cacheDescribe,
+  setDescribeGlobal,
 }

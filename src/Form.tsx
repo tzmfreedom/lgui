@@ -14,8 +14,6 @@ import { setOverlay, clearOverlay, addFlashMessage } from './actions';
 import { getAllUrlParams } from './util';
 import { ConfigStore, Settings, Config, LayoutDefinition, LayoutDefinitionField, LayoutStore } from './ConfigStore';
 
-const config = ConfigStore.getObject(Settings.Key, Settings.Default) as Config;
-
 interface MyProps extends RouteComponentProps {
   object: string
   id: string | null
@@ -47,6 +45,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Form: React.FC<MyProps> = (props: MyProps) => {
+  const config = ConfigStore.getObject(Settings.Key, Settings.Default) as Config;
   const classes = useStyles();
   const [form, setForm]: any = useState({});
   const conn = useSelector((state: any) => state.conn);
@@ -55,8 +54,8 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     default: {
       definitions: [
         {
+          type: 'field',
           name: 'Name',
-          required: true,
         }
       ],
       defaultSize: 4,

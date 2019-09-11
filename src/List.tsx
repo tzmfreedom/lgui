@@ -1,20 +1,29 @@
 import React, {useEffect, useState, useCallback, useMemo} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Container from "@material-ui/core/Container";
-import Snackbar from '@material-ui/core/Snackbar';
 import { addFlashMessage, clearFlashMessage, setOverlay, clearOverlay, cacheRecords, cacheDescribe } from './actions';
-import Button from "@material-ui/core/Button";
 import {withRouter} from "react-router";
 import {getAllUrlParams} from './util';
 import Select from "react-select";
 import { ConfigStore, Settings, Config } from "./ConfigStore";
 import { CSVLink } from "react-csv";
- 
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Container,
+  Snackbar,
+  Drawer,
+  Divider,
+  Button,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from '@material-ui/core';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import MailIcon from '@material-ui/icons/Mail';
+
 type Response = {
   records: any
 }
@@ -161,6 +170,30 @@ const List: React.FC<any> = (props: any) => {
   return (
     <Container component="main" maxWidth="md">
       <React.Fragment>
+      <Drawer
+        variant="permanent"
+        anchor="right"
+      >
+        <div />
+        <Divider />
+        {/* <List>
+          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+            <ListItem button key={text}>
+              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItem>
+          ))}
+        </List> */}
+        {/* <Divider />
+        <List>
+          {['All mail', 'Trash', 'Spam'].map((text, index) => (
+            <ListItem button key={text}>
+              <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItem>
+          ))}
+        </List> */}
+      </Drawer>
         { flash.length > 0 && (
           <Snackbar
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

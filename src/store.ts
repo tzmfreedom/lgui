@@ -52,6 +52,12 @@ const rootReducer = (state: any = INIT_STATE, action: any) => {
                 ret.cache[action.object].describe = action.fields;
                 return ret;
             })()
+        case 'set-describe-global':
+            return (() => {
+                const ret = Object.assign({}, state);
+                ret.cache.describeGlobalResult = action.describeGlobalResult;
+                return ret;
+            })()
     }
     return state;
 }
