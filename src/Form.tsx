@@ -1,18 +1,13 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
 import { useSelector, useDispatch } from "react-redux";
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { setOverlay, clearOverlay, addFlashMessage } from './actions';
 import { getAllUrlParams } from './util';
-import { ConfigStore, Settings, Config, LayoutDefinition, LayoutDefinitionField, LayoutStore } from './ConfigStore';
+import { ConfigStore, Settings, Config, LayoutDefinition, LayoutDefinitionField, LayoutStore, Trigger } from './ConfigStore';
+import SObjectForm from './SObjectForm';
 
 interface MyProps extends RouteComponentProps {
   object: string
@@ -44,10 +39,25 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+const runTrigger = (trigger: Trigger, conn: any, form: any, id: string | null, f: Function) => {
+  switch (trigger.name) {
+    case 'CreateRecord':
+      const params = Object.assign({}, form, { Id: id });
+      const fields = trigger.definition.fields as any;
+      const createObject = Object.keys(fields).reduce((ret: any, key: string) => {
+        ret[fields[key]] = params[key];
+        return ret;
+      }, {})
+      conn.sobject(trigger.name).create(createObject, (err: any, ret: any) => {
+        f();
+      });
+  }
+}
+
 const Form: React.FC<MyProps> = (props: MyProps) => {
   const config = ConfigStore.getObject(Settings.Key, Settings.Default) as Config;
   const classes = useStyles();
-  const [form, setForm]: any = useState({});
+  const [form, setForm]: any = useState();
   const conn = useSelector((state: any) => state.conn);
   const dispatch = useDispatch();
   const layout = config.layouts[props.object] ? config.layouts[props.object] : {
@@ -61,19 +71,9 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
       defaultSize: 4,
     }
   } as LayoutStore;
-  const defaultSize = layout.default.defaultSize;
   const definitions = layout.default.definitions;
-  const onFormChange = (name: string) => {
-    return (e: any) => {
-      const value = e.target.value;
-      setForm((prev: any) => {
-        return Object.assign({}, prev, {
-          [name]: value,
-        })
-      })
-    }
-  };
-  const createOrUpdate = useCallback((e: any) => {
+  const trigger = layout.default.trigger;
+  const onCreateOrUpdate = useCallback((e: any) => {
     e.preventDefault();
     dispatch(setOverlay());
     if (props.id) {
@@ -83,8 +83,15 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
           addFlashMessage(err);
           return;
         }
-        dispatch(addFlashMessage(`${props.id} record is updated`));
-        props.history.push(`/${props.object}`);
+        if (trigger) {
+          runTrigger(trigger, conn, form, props.id, () => {
+            dispatch(addFlashMessage(`${props.id} record is updated`));
+            props.history.push(`/${props.object}`);
+          });
+        } else {
+          dispatch(addFlashMessage(`${props.id} record is updated`));
+          props.history.push(`/${props.object}`);
+        }
       });
     } else {
       conn.sobject(props.object).create(form, (err: any, ret: any) => {
@@ -120,46 +127,9 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
     <Container component="main" maxWidth="md">
       <CssBaseline />
       <div className={classes.paper}>
-        <Typography component="h1" variant="h5">Create Record</Typography>
-        <form className={classes.form} noValidate>
-          <Grid container spacing={2}>
-            {definitions.map((def: LayoutDefinition) => {
-              switch (def.type) {
-                case 'field':
-                  return (
-                    <Grid item xs={12} sm={defaultSize} key={def.name}>
-                      <TextField
-                        autoComplete="fname"
-                        name={def.name}
-                        variant="outlined"
-                        fullWidth
-                        id={def.name}
-                        label={def.label}
-                        onChange={onFormChange(def.name)}
-                        value={form[def.name] ? form[def.name] + '' : ''}
-                      // autoFocus
-                      />
-                    </Grid>
-                  );
-                case 'blank':
-                    return <Grid item xs={12} sm={defaultSize} key={'blank'}></Grid>
-                case 'section':
-                    return <Grid item xs={12} sm={defaultSize} key={'section'}></Grid>
-                case 'button':
-                    return <Grid item xs={12} sm={defaultSize} key={'button'}></Grid>
-              }
-            })}
-          </Grid>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={createOrUpdate}
-          >
-            {props.id ? 'Update' : 'Create'}
-          </Button>
-        </form>
+        {form && (
+          <SObjectForm layout={layout.default} onCreateOrUpdate={onCreateOrUpdate} init={form} update={!!props.id} />
+        )}
       </div>
     </Container>
   );

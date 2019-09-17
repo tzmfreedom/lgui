@@ -13,21 +13,19 @@ const GlobalMenu: React.FC<any> = (props: any) => {
     props.history.push(value)
   }, []);
   return (
-    <div>
-      <AppBar position="static">
-        <Tabs 
-          value={tabValue}
-          onChange={handleChange}
-          variant="scrollable"
-          scrollButtons="auto" >
-          <Tab label="Home" value="/" />
-          {props.objects.map((object: any) => {
-            return <Tab key={object} label={object} value={`/${object}`} />
-          })}
-          <Tab label="Setting" value="/setting" />
-        </Tabs>
-      </AppBar>
-    </div>
+    <AppBar position="static">
+      <Tabs
+        value={tabValue}
+        onChange={handleChange}
+        variant="scrollable"
+        scrollButtons="auto" >
+        <Tab label="Home" value="/" />
+        {props.objects.map((object: any) => {
+          return <Tab key={object} label={object} value={`/${object}`} />
+        })}
+        <Tab label="Setting" value="/setting" />
+      </Tabs>
+    </AppBar>
   );
 }
 

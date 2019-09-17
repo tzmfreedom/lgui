@@ -9,9 +9,18 @@ export interface LayoutStore {
     [key:string] : Layout
 }
 
+type TriggerType = 'CreateRecord' | 'UpdateRecord'
+
+export interface Trigger {
+    name: string
+    type: TriggerType
+    definition: any
+}
+
 export interface Layout {
     definitions: Array<LayoutDefinition>
     defaultSize: any
+    trigger?: Trigger
 }
 
 export type LayoutDefinition = LayoutDefinitionField | LayoutDefinitionButton | LayoutDefinitionSection | LayoutDefinitionBlank;

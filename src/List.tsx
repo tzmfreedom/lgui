@@ -7,13 +7,7 @@ import Select from "react-select";
 import { ConfigStore, Settings, Config } from "./ConfigStore";
 import { CSVLink } from "react-csv";
 import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Container,
-  Snackbar,
   Drawer,
   Divider,
   Button,
@@ -23,6 +17,8 @@ import {
 } from '@material-ui/core';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
+import SObjectList from './SObjectList';
+import Flash from './Flash';
 
 type Response = {
   records: any
@@ -170,13 +166,13 @@ const List: React.FC<any> = (props: any) => {
   return (
     <Container component="main" maxWidth="md">
       <React.Fragment>
-      <Drawer
-        variant="permanent"
-        anchor="right"
-      >
-        <div />
-        <Divider />
-        {/* <List>
+        <Drawer
+          variant="permanent"
+          anchor="right"
+        >
+          <div />
+          <Divider />
+          {/* <List>
           {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
             <ListItem button key={text}>
               <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
@@ -184,7 +180,7 @@ const List: React.FC<any> = (props: any) => {
             </ListItem>
           ))}
         </List> */}
-        {/* <Divider />
+          {/* <Divider />
         <List>
           {['All mail', 'Trash', 'Spam'].map((text, index) => (
             <ListItem button key={text}>
@@ -193,19 +189,8 @@ const List: React.FC<any> = (props: any) => {
             </ListItem>
           ))}
         </List> */}
-      </Drawer>
-        { flash.length > 0 && (
-          <Snackbar
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            key="flash-message"
-            open={true}
-            onClose={handleClose}
-            ContentProps={{
-              'aria-describedby': 'message-id',
-            }}
-            message={<span id="message-id">{flash}</span>}
-          />
-        ) }
+        </Drawer>
+        <Flash flash={flash} onClose={handleClose}/>
         <Button variant="contained" color="primary" onClick={() => { props.history.push(`/${props.object}/new/`) }}>Create</Button>
         <Select
           className='fields'
@@ -215,33 +200,14 @@ const List: React.FC<any> = (props: any) => {
         />
         <Button variant="contained" color="primary" onClick={addField}>Add Field</Button>
         <Button variant="contained" color="primary" onClick={saveView}>Save View</Button>
-        <CSVLink data={csvData}>Download me</CSVLink>
-        <h2>{props.object} List</h2>
-        { records.length !== 0 && (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Action</TableCell>
-                {fields.map((field: any) => {
-                  return <TableCell key={field}>{field}</TableCell>
-                })}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {records.map((record: any) => (
-                <TableRow key={record.Id}>
-                  <TableCell key="action">
-                    <a href="#" onClick={() => props.history.push(`/${props.object}/${record.Id}/`) }>Edit</a> |
-                    &nbsp;<a href="#" onClick={() => { deleteRequest(record.Id) }}>Delete</a>
-                  </TableCell>
-                  {fields.map((field: any) => {
-                    return <TableCell key={field}>{record[field]}</TableCell>
-                  })}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+        <CSVLink data={csvData}>Download</CSVLink>
+        <SObjectList
+          object={props.object}
+          records={records}
+          fields={fields}
+          onClickEdit={(record: any) => props.history.push(`/${props.object}/${record.Id}/`)}
+          onClickDelete={(record: any) => { deleteRequest(record.Id) }}
+        />
       </React.Fragment>
     </Container>
   );
