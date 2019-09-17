@@ -34,8 +34,14 @@ const SObjectList: React.FC<SObjectListProps> = (props: SObjectListProps) => {
             {records.map((record: any) => (
               <TableRow key={record.Id}>
                 <TableCell key="action">
-                  <a href="#" onClick={() => onClickEdit(record)}>Edit</a> |
-                    &nbsp;<a href="#" onClick={() => onClickDelete(record)}>Delete</a>
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    onClickEdit(record);
+                  }}>Edit</a> |
+                    &nbsp;<a href="#" onClick={(e) => {
+                      e.preventDefault();
+                      onClickDelete(record);
+                    }}>Delete</a>
                 </TableCell>
                 {fields.map((field: any) => {
                   return <TableCell key={field}>{record[field]}</TableCell>

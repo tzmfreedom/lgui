@@ -26,7 +26,10 @@ const SObjectForm: React.FC<SObjectFormProps> = (props: SObjectFormProps) => {
     }
   };
 
-  const onCreateOrUpdateCallback = useCallback(() => onCreateOrUpdate(form), [form])
+  const onCreateOrUpdateCallback = useCallback((e) => {
+    e.preventDefault();
+    onCreateOrUpdate(form)
+  }, [form]);
   return (
     <>
       <Typography component="h1" variant="h5">{ update ? 'Update' : 'Create' } Record</Typography>
@@ -46,6 +49,7 @@ const SObjectForm: React.FC<SObjectFormProps> = (props: SObjectFormProps) => {
                       label={def.label}
                       onChange={onFormChange(def.name)}
                       value={form[def.name] ? form[def.name] + '' : ''}
+                      required={def.required}
                     // autoFocus
                     />
                   </Grid>

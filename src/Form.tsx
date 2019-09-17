@@ -57,7 +57,7 @@ const runTrigger = (trigger: Trigger, conn: any, form: any, id: string | null, f
 const Form: React.FC<MyProps> = (props: MyProps) => {
   const config = ConfigStore.getObject(Settings.Key, Settings.Default) as Config;
   const classes = useStyles();
-  const [form, setForm]: any = useState();
+  const [form, setForm]: any = useState({});
   const conn = useSelector((state: any) => state.conn);
   const dispatch = useDispatch();
   const layout = config.layouts[props.object] ? config.layouts[props.object] : {
@@ -73,8 +73,7 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
   } as LayoutStore;
   const definitions = layout.default.definitions;
   const trigger = layout.default.trigger;
-  const onCreateOrUpdate = useCallback((e: any) => {
-    e.preventDefault();
+  const onCreateOrUpdate = useCallback((form: any) => {
     dispatch(setOverlay());
     if (props.id) {
       conn.sobject(props.object).update(Object.assign({}, form, {Id: props.id}), (err: any, ret: any) => {
@@ -118,7 +117,7 @@ const Form: React.FC<MyProps> = (props: MyProps) => {
         }
 
         const params = getAllUrlParams(window.location.href);
-        setForm((prev: any) => Object.assign(init, params));
+        setForm(Object.assign(init, params));
       });
     }
   }, [props.object, props.id]);
